@@ -1,0 +1,146 @@
+<!DOCTYPE html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><title>Dota Draft Sim</title>
+<style>
+:root{color-scheme:dark;--bg:#0b0d12;--ln:#2a3142;--tx:#e8ecf4;--mu:#8b94a8;--rd:#e0453a;--gd:#f0b429;--gn:#3ecf8e;--bl:#4aa3ff;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html,body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+body{background:radial-gradient(800px 360px at 50% -80px,#4a1219 0,transparent 70%),var(--bg);min-height:100%}
+#app{max-width:480px;margin:0 auto;padding:10px 12px 40px}
+.top{display:flex;justify-content:space-between;align-items:center;padding:6px 2px}
+.logo{font:800 18px Impact,"Arial Narrow",sans-serif;letter-spacing:1px;color:var(--rd);text-shadow:0 0 12px #e0453a99}
+.mmr{background:#1b2030;border:1px solid var(--gd);color:var(--gd);border-radius:20px;padding:3px 12px;font-weight:700}
+h2{margin:8px 0 2px;font:800 22px Impact,"Arial Narrow",sans-serif;letter-spacing:.5px}
+.mu{color:var(--mu);font-size:13px}
+.card{background:linear-gradient(180deg,#1a1f2b,#12151d);border:1px solid var(--ln);border-radius:14px;padding:12px;margin:10px 0}
+.btn{display:block;width:100%;padding:14px;border:0;border-radius:12px;font:700 16px system-ui;color:#fff;background:linear-gradient(180deg,#e8493d,#a82820);box-shadow:0 0 18px #e0453a55;margin:8px 0;cursor:pointer}
+.btn.alt{background:linear-gradient(180deg,#2c3446,#1b2030);box-shadow:none}
+.btn:disabled{opacity:.35;box-shadow:none}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+.g2{grid-template-columns:repeat(2,1fr)}
+.hero{background:#141823;border:2px solid var(--ln);border-radius:10px;padding:5px;text-align:center;color:var(--tx);font:12px system-ui;cursor:pointer}
+.hero.on{border-color:var(--gd);box-shadow:0 0 14px #f0b42988}
+.hero.dis{opacity:.4}
+.av{position:relative;aspect-ratio:16/9;border-radius:6px;overflow:hidden;display:flex;align-items:center;justify-content:center;margin:0 auto 4px;color:#fff;font:800 18px Impact,sans-serif}
+.av img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.carry{background:linear-gradient(135deg,#c0392b,#4a0f0b)}.mid{background:linear-gradient(135deg,#2e86de,#0c2a52)}.off{background:linear-gradient(135deg,#e67e22,#55290a)}.sup{background:linear-gradient(135deg,#27ae60,#0a3a1d)}
+.rl{font-size:10px;color:var(--mu)}
+.row{display:flex;gap:8px;align-items:center}
+.lane{display:flex;gap:6px;align-items:center;padding:6px 0;border-top:1px solid var(--ln)}
+.lane:first-child{border-top:0}
+.lane .av{width:64px;margin:0}
+.lb{width:44px;font-weight:800;color:var(--gd)}
+.score{font:800 56px Impact,sans-serif;text-align:center;color:var(--gd);text-shadow:0 0 24px #f0b42988}
+.item{background:#141823;border:2px solid var(--ln);border-radius:10px;padding:5px;text-align:center;font:11px system-ui;color:var(--tx);cursor:pointer;position:relative}
+.item.on{border-color:var(--gd);box-shadow:0 0 14px #f0b42988}
+.item .ii{aspect-ratio:88/64;background:#222a3a;border-radius:6px;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px;color:#7d89a6}
+.item img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.cost{color:var(--gd);font-weight:700}
+.inv{display:grid;grid-template-columns:repeat(6,1fr);gap:5px;margin:8px 0}
+.slot{aspect-ratio:1;background:#0f1219;border:1px dashed var(--ln);border-radius:8px;position:relative;overflow:hidden;font-size:9px;display:flex;align-items:center;justify-content:center;text-align:center;color:var(--mu)}
+.slot img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.opt{display:block;width:100%;text-align:left;background:#141823;border:2px solid var(--ln);border-radius:10px;padding:10px;margin:6px 0;color:var(--tx);font:14px system-ui;cursor:pointer}
+.opt.on{border-color:var(--gd);box-shadow:0 0 14px #f0b42988}
+.opt b{display:block}.opt span{color:var(--mu);font-size:12px}
+.log p{margin:6px 0;padding-left:10px;border-left:3px solid var(--ln)}
+.log p.w{border-color:var(--gn)}.log p.l{border-color:var(--rd)}
+.sb{display:flex;justify-content:space-between;font-weight:700;margin:4px 0}
+.bar{height:10px;border-radius:6px;background:var(--rd);overflow:hidden;margin:4px 0}
+.bar i{display:block;height:100%;background:var(--gn)}
+.win{color:var(--gn)}.lose{color:var(--rd)}
+.tag{display:inline-block;font-size:11px;background:#222a3a;border-radius:6px;padding:1px 6px;margin:1px;color:#aab4cc}
+ul{padding-left:18px;margin:6px 0}
+</style></head><body><div id="app"></div>
+<script>
+try{var tg=window.Telegram&&Telegram.WebApp;if(tg){tg.ready();tg.expand()}}catch(e){}
+const $=s=>document.querySelector(s),R=(a,b)=>a+Math.random()*(b-a),pick=a=>a[Math.random()*a.length|0],fl=l=>[].concat(l.top,l.mid,l.bot);
+const IMG='https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/';
+const LN={top:'Топ',mid:'Мид',bot:'Бот'},RN={carry:'Керри',mid:'Мид',off:'Оффлейн',sup:'Саппорт'};
+// S=стан, B=бёрст, C=лейт-скейл, P=пуш, H=саст/хил, M=магия, F=физ
+const H=[['nevermore','Shadow Fiend','mid',['mid'],[7,7,6],'BF'],['pudge','Pudge','off',['top','mid'],[6,8,6],'SBM'],['invoker','Invoker','mid',['mid'],[5,8,8],'BMC'],['phantom_assassin','Phantom Assassin','carry',['bot'],[5,7,9],'CF'],['antimage','Anti-Mage','carry',['bot'],[4,6,10],'CF'],['juggernaut','Juggernaut','carry',['bot'],[6,8,8],'CFP'],['axe','Axe','off',['top'],[8,8,5],'SBF'],['lion','Lion','sup',['bot','top'],[8,7,4],'SBM'],['crystal_maiden','Crystal Maiden','sup',['bot'],[7,5,3],'SMH'],['huskar','Huskar','carry',['mid','bot'],[8,7,5],'BM'],['tinker','Tinker','mid',['mid'],[4,8,7],'PM'],['rubick','Rubick','sup',['top','bot'],[6,7,6],'SM'],['earthshaker','Earthshaker','sup',['top','bot'],[7,8,5],'SM'],['drow_ranger','Drow Ranger','carry',['bot'],[6,7,8],'FP'],['sniper','Sniper','carry',['mid','bot'],[7,7,6],'F'],['bristleback','Bristleback','off',['top'],[7,8,7],'HFP'],['necrolyte','Necrophos','off',['top','mid'],[8,7,6],'HM'],['queenofpain','Queen of Pain','mid',['mid'],[7,8,6],'BM'],['storm_spirit','Storm Spirit','mid',['mid'],[5,8,8],'BM'],['witch_doctor','Witch Doctor','sup',['bot','top'],[6,7,5],'SMH']].map(a=>({id:a[0],n:a[1],r:a[2],l:a[3],p:a[4],t:a[5]}));
+const M={};H.forEach(h=>M[h.id]=h);
+const CT={antimage:['invoker','storm_spirit','tinker','crystal_maiden'],pudge:['sniper','drow_ranger','tinker'],lion:['invoker','storm_spirit','antimage'],axe:['phantom_assassin','juggernaut','huskar'],earthshaker:['phantom_assassin','antimage','juggernaut'],necrolyte:['huskar','axe'],bristleback:['phantom_assassin','sniper'],queenofpain:['sniper','drow_ranger','tinker']};
+const SHOP=[['tango','Tango',90],['flask','Healing Salve',100],['magic_stick','Magic Stick',200],['quelling_blade','Quelling Blade',100],['branches','Iron Branch',50],['boots','Boots of Speed',500],['faerie_fire','Faerie Fire',70],['blight_stone','Blight Stone',300]];
+const SN={};SHOP.forEach(s=>SN[s[0]]=s);
+const ST=[{n:'Лейнинг (0–10 мин)',styles:[{n:'Агрессия на линиях',t:'SB',nv:3,d:'Станы и бёрст давят вражеских героев'},{n:'Фарм и стак',t:'C',nv:2,d:'Скейл-герои набирают золото'},{n:'Безопасный лейн',t:'H',nv:1.2,d:'Реген и стабильность, меньше разброс'}],items:[{n:'Bracer',i:'bracer',t:'H',d:'Живучесть'},{n:'Magic Wand',i:'magic_wand',t:'B',d:'Размен в драках'},{n:'Bottle',i:'bottle',t:'M',d:'Руны и мана'}]},
+{n:'Мидгейм (10–25 мин)',styles:[{n:'Драки 5х5',t:'SB',nv:3.5,d:'Контроль и бёрст решают исход'},{n:'Пуш и Рошан',t:'P',nv:2.5,d:'Давим вышки, берём Рошана'},{n:'Фарм линий',t:'C',nv:2,d:'Копим нетворс под лейт'}],items:[{n:'Blink Dagger',i:'blink',t:'S',d:'Инициация'},{n:'Black King Bar',i:'black_king_bar',t:'F',d:'Живём в драках'},{n:'Mekansm',i:'mekansm',t:'H',d:'Хил команды'}]},
+{n:'Лейтгейм (25+ мин)',styles:[{n:'Решающая драка',t:'SB',nv:4,d:'Идём ва-банк в драке'},{n:'Затяжка',t:'CH',nv:2.5,d:'Тянем на скейле и састе'},{n:'Пуш хай-граунда',t:'P',nv:3,d:'Ломаем трон'}],items:[{n:"Aghanim's Scepter",i:'ultimate_scepter',t:'M',d:'Магический урон'},{n:'Butterfly',i:'butterfly',t:'F',d:'Физический урон'},{n:'Refresher Orb',i:'refresher',t:'S',d:'Двойной контроль'}]}];
+let mmr=1000;try{mmr=+localStorage.getItem('mmr')||1000}catch(e){}
+const save=()=>{try{localStorage.setItem('mmr',mmr)}catch(e){}};
+let S={};
+const av=(h,w)=>`<div class="av ${h.r}" ${w?`style="width:${w}px"`:''}><span>${h.n.split(' ').map(x=>x[0]).join('').slice(0,2)}</span><img src="${IMG}heroes/${h.id}.png" alt="" onerror="this.remove()"></div>`;
+const iimg=(id,n)=>`<div class="ii"><span>${n[0]}</span><img src="${IMG}items/${id}.png" alt="" onerror="this.remove()"></div>`;
+const ui=(h,sc=1)=>{$('#app').innerHTML=`<div class="top"><div class="logo">DRAFT SIM</div><div class="mmr">${mmr} MMR</div></div>${h}`;if(sc)scrollTo(0,0)};
+const lanesHtml=(l,sh)=>['top','mid','bot'].map(k=>`<div class="lane"><div class="lb">${LN[k]}</div>${l[k].map(id=>`<div style="flex:1">${av(M[id])}<div class="rl" style="text-align:center">${M[id].n}</div></div>`).join('')}</div>`).join('');
+
+function menu(){S={};ui(`<h2>Выбери режим</h2><div class="mu">Драфт, закуп и лайнинг. Победа даёт MMR.</div>
+<div class="card"><b>Один герой</b><div class="mu">Ты пикаешь героя и линию, остальных четверых подберёт ИИ.</div><button class="btn" onclick="start(1)">Один герой</button></div>
+<div class="card"><b>Весь драфт</b><div class="mu">Собери команду 5 на 5 сам.</div><button class="btn" onclick="start(5)">Весь драфт</button></div>
+<button class="btn alt" onclick="if(confirm('Сбросить MMR до 1000?')){mmr=1000;save();menu()}">Сбросить MMR</button>`)}
+function start(n){S={mode:n,sel:[]};draft()}
+function draft(sc=1){const one=S.mode==1,ok=one?S.sel.length==1:S.sel.length==5;
+ui(`<h2>Драфт</h2><div class="mu">${one?'Выбери героя':`Выбрано ${S.sel.length}/5. Нужны керри, мид, оффлейн и саппорты.`}</div>
+<div class="grid" style="margin:10px 0">${H.map(h=>`<button class="hero ${S.sel.includes(h.id)?'on':''}" onclick="tog('${h.id}')">${av(h)}<b>${h.n}</b><div class="rl">${RN[h.r]}</div></button>`).join('')}</div>
+<button class="btn" ${ok?'':'disabled'} onclick="${one?'laneSel()':'setup()'}">Подтвердить</button><button class="btn alt" onclick="menu()">В меню</button>`,sc)}
+function tog(id){if(S.mode==1)S.sel=[id];else{const i=S.sel.indexOf(id);i>=0?S.sel.splice(i,1):S.sel.length<5&&S.sel.push(id)}draft(0)}
+function laneSel(){const h=M[S.sel[0]];ui(`<h2>Линия для ${h.n}</h2><div class="card">${av(h,200)}<div class="mu" style="text-align:center">${RN[h.r]}. Подходящие линии отмечены ★</div></div>${['top','mid','bot'].map(l=>`<button class="btn ${h.l.includes(l)?'':'alt'}" onclick="S.lane='${l}';setup()">${LN[l]} ${h.l.includes(l)?'★':''}</button>`).join('')}`)}
+function assign(ids){const cap={top:2,mid:1,bot:2},res={top:[],mid:[],bot:[]},o={carry:0,mid:1,off:2,sup:3};
+[...ids].sort((a,b)=>o[M[a].r]-o[M[b].r]).forEach(id=>{const L=M[id].l.find(l=>cap[l]>0)||Object.keys(cap).find(l=>cap[l]>0);cap[L]--;res[L].push(id)});return res}
+function fill(l,used){used=[...used];const W={mid:['mid'],bot:['carry','sup'],top:['off','sup']};
+for(const L of ['mid','bot','top']){const w=[...W[L]];l[L].forEach(id=>{const i=w.indexOf(M[id].r);w.splice(i<0?0:i,1)});
+w.forEach(r=>{const a=H.filter(h=>!used.includes(h.id));let c=a.filter(h=>h.r==r&&h.l.includes(L));if(!c.length)c=a.filter(h=>h.r==r);if(!c.length)c=a;const h=pick(c);used.push(h.id);l[L].push(h.id)})}return l}
+function setup(){if(S.mode==1){const l={top:[],mid:[],bot:[]};l[S.lane].push(S.sel[0]);S.my=fill(l,[S.sel[0]])}else S.my=assign(S.sel);
+S.en=fill({top:[],mid:[],bot:[]},fl(S.my));S.ev=evalD();review()}
+function evalD(){const T=fl(S.my).map(i=>M[i]),E=fl(S.en).map(i=>M[i]),c=x=>T.filter(h=>h.t.includes(x)).length,rc=r=>T.filter(h=>h.r==r).length;let s=5,n=[];
+rc('carry')?s++:(s-=1.5,n.push('Нет керри: некому тащить лейт.'));rc('mid')?s++:(s-=1.5,n.push('Нет мидера: линия без опыта и темпа.'));
+rc('off')?s+=.5:(s-=1,n.push('Нет оффлейнера: некому начинать драки.'));
+rc('sup')?(s+=.5,rc('sup')>1&&(s+=.5)):(s-=2,n.push('Нет саппортов: герои будут голодать.'));
+c('S')>=3?(s+=1,n.push(`Контроля много (${c('S')} героев): легко ловить цели.`)):c('S')<2&&(s-=1.5,n.push('Мало стана: врага трудно удержать.'));
+c('M')&&c('F')?(s+=.5,n.push('Смешанный урон: сложно закупаться против вас.')):(s-=1,n.push('Урон одного типа: враг ответит бронёй или MKB/Pipe.'));
+c('C')>=2?(s+=.5,n.push('Два скейл-героя дают сильный лейт.')):n.push('Мало скейла: игру надо закончить до лейта.');
+c('H')&&n.push('Есть сустейн: проще пережить лейнинг.');
+T.forEach(t=>E.forEach(e=>{if((CT[t.id]||[]).includes(e.id)){s+=.4;n.push(`Контрпик: ${t.n} давит ${e.n}.`)}if((CT[e.id]||[]).includes(t.id)){s-=.4;n.push(`Враг контрит: ${e.n} против ${t.n}.`)}}));
+return{raw:s,s:Math.max(1,Math.min(10,Math.round(s))),n}}
+function review(){const e=S.ev;ui(`<h2>Оценка драфта</h2><div class="card"><div class="score">${e.s}/10</div><div class="mu" style="text-align:center">${e.s>=8?'Отличный драфт':e.s>=6?'Играбельно':'Слабая связка'}</div></div>
+<div class="card"><b>Твоя команда</b>${lanesHtml(S.my)}</div><div class="card"><b>Враги</b>${lanesHtml(S.en)}</div>
+<div class="card"><b>Синергия и контрпики</b><ul>${e.n.map(x=>`<li>${x}</li>`).join('')}</ul></div><button class="btn" onclick="buy()">К закупу</button>`)}
+function buy(){S.inv=[];buyUi()}
+const gold=()=>600-S.inv.reduce((a,i)=>a+SN[i][2],0);
+function buyUi(){ui(`<h2>Стартовый закуп</h2><div class="mu">${S.mode==1?`Герой: ${M[S.sel[0]].n} (${RN[M[S.sel[0]].r]}), ${LN[S.lane]}.`:'Закуп применяется ко всей команде.'} До 6 слотов, тапни по предмету в инвентаре, чтобы убрать.</div>
+<div class="card"><div class="sb"><span>Золото</span><span class="cost">${gold()}</span></div><div class="inv">${[0,1,2,3,4,5].map(i=>{const x=S.inv[i];return`<div class="slot" ${x?`onclick="S.inv.splice(${i},1);buyUi()"`:''}>${x?`${SN[x][1]}<img src="${IMG}items/${x}.png" alt="" onerror="this.remove()">`:''}</div>`}).join('')}</div></div>
+<div class="grid">${SHOP.map(s=>`<button class="item" onclick="if(gold()>=${s[2]}&&S.inv.length<6){S.inv.push('${s[0]}');buyUi()}">${iimg(s[0],s[1])}${s[1]}<div class="cost">${s[2]}</div></button>`).join('')}</div>
+<button class="btn" onclick="S.bm=buyMod();match()">Начать матч</button>`,0)}
+function buyMod(){const c=id=>S.inv.filter(x=>x==id).length,r=S.mode==1?M[S.sel[0]].r:null,reg=c('tango')+c('flask');let m=0,w=[];
+if(!reg){m-=2.5;w.push('Нет регена (Tango или Salve): линия будет тяжёлой.')}else m+=Math.min(2,reg)*.8;
+if(c('boots')){if(reg)m+=.8;else{m-=1.5;w.push('Голые сапоги без регена: слабый закуп.')}}
+if(c('quelling_blade')){if(r==null||r=='carry'||r=='off')m+=.6;else{m-=.3;w.push('Quelling Blade саппорту почти не нужен.')}}
+m+=c('magic_stick')*(r=='sup'?.9:.6)+Math.min(3,c('branches'))*.2+c('faerie_fire')*.3+c('blight_stone')*.3;
+const sp=600-gold();if(sp<300){m-=1;w.push('Потрачено слишком мало золота.')}
+if(!S.inv.length){m-=1;w.push('Пустой закуп.')}
+return{m:Math.max(-5,Math.min(4,m)),w}}
+function match(){S.st=0;S.k=0;S.ek=0;S.nw=0;S.enw=0;S.M=0;S.eff=[];S.lost=[];stageUi()}
+function stageUi(sc=1){const D=ST[S.st];ui(`<h2>${D.n}</h2><div class="mu">Выбери стиль и ключевой предмет.</div><b>Стиль игры</b>
+${D.styles.map((x,i)=>`<button class="opt ${S.sty===i?'on':''}" onclick="S.sty=${i};stageUi(0)"><b>${x.n}</b><span>${x.d}</span></button>`).join('')}<b>Ключевой артефакт</b>
+${D.items.map((x,i)=>`<button class="opt ${S.itm===i?'on':''}" onclick="S.itm=${i};stageUi(0)"><b>${x.n}</b><span>${x.d}</span></button>`).join('')}
+<button class="btn" ${S.sty!=null&&S.itm!=null?'':'disabled'} onclick="play()">Играть стадию</button>`,sc)}
+const tpos=['{a} зажимает {b}: убийство в начале драки','Тимфайт у Рошана: {a} и команда разбирают {b}','{a} ломает вышку, пока враги телепортируются','Рошан наш, Aegis у {a}','{a} находит {b} в лесу и берёт пик'],tneg=['{b} ловит {a} в смоке: потеря героя','Драка проиграна: {b} разносит нашу линию','{b} снимает вышку, мы не успеваем с ТП','Рошана забирают враги, Aegis у {b}','{a} ошибся с позицией и умер от {b}'];
+function play(){const s=S.st,D=ST[s],sty=D.styles[S.sty],it=D.items[S.itm],T=fl(S.my).map(i=>M[i]),E=fl(S.en).map(i=>M[i]);
+const cnt=(a,t)=>a.reduce((x,h)=>x+[...t].filter(c=>h.t.includes(c)).length,0),sb=cnt(T,sty.t)*.45,ib=cnt(T,it.t)*.35+.4,eb=R(0,3),syn=(S.ev.raw-5)*.4,nv=sty.nv,bm=S.bm.m;let m,L=[];
+if(s==0){const ds=[];['top','mid','bot'].forEach(k=>{const a=S.my[k].map(i=>M[i]),e=S.en[k].map(i=>M[i]),pa=a.reduce((x,h)=>x+h.p[0]*(h.l.includes(k)?1:.85),0)/a.length,pe=e.reduce((x,h)=>x+h.p[0]*(h.l.includes(k)?1:.85),0)/e.length;
+let b=S.mode==1?(k==S.lane?bm*1.6:.4):bm;const d=(pa-pe)*1.1+b+(sb+ib-eb-2)*.35+syn/2+R(-nv,nv);ds.push(d);
+const an=a.map(h=>h.n).join(' + '),en=e.map(h=>h.n).join(' + ');
+if(S.mode==1&&k==S.lane&&!M[S.sel[0]].l.includes(k))S.lost.push('Герой играл на нестандартной линии.');
+if(d>1.5)L.push([`${LN[k]}: ${an} дожимают ${en}. Линия выиграна, враги на 2-3 уровня позади.`,'w']);else if(d<-1.5){L.push([`${LN[k]}: ${en} выигрывают лейн у ${an}. Нам приходится отступать к вышке.`,'l']);S.lost.push(`Проиграл ${LN[k].toLowerCase()} на лейнинге.`)}else L.push([`${LN[k]}: ровный лейн, оба героя фармят под вышкой.`,'']);});
+m=ds.reduce((a,b)=>a+b)/3}
+else{const A=T.reduce((x,h)=>x+h.p[s],0),B=E.reduce((x,h)=>x+h.p[s],0);m=(A-B)*.3+(sb+ib-eb-2)*.6+syn+(s==1?bm*.3:0)+R(-nv,nv)}
+if(s>0)for(let i=0;i<4;i++){const win=Math.random()<.5+m*.07,t=pick(win?tpos:tneg);L.push([t.replace('{a}',pick(T).n).replace('{b}',pick(E).n),win?'w':'l'])}
+const K=[10,16,18][s],ak=Math.max(1,Math.round(K/2+m*1.2)),ek=Math.max(1,Math.round(K/2-m*1.2)),base=[13000,30000,40000][s],na=Math.round(base*(1+m*.03)/100)*100,ne=Math.round(base*(1-m*.03)/100)*100;
+S.k+=ak;S.ek+=ek;S.nw+=na;S.enw+=ne;S.M+=m;S.eff.push({n:D.n,sty:sty.n,sb});
+const res=`<div class="card"><div class="sb"><span class="win">Мы</span><span class="lose">Враги</span></div><div class="sb"><span>Убийства: ${S.k}</span><span>${S.ek}</span></div><div class="sb"><span>Нетворс: ${S.nw}</span><span>${S.enw}</span></div><div class="bar"><i style="width:${Math.max(5,Math.min(95,50+m*6))}%"></i></div><div class="mu">${m>1?'Стадия за нами':m<-1?'Стадия за врагами':'Равная стадия'}</div></div>`;
+S.sty=null;S.itm=null;const last=s==2;
+ui(`<h2>${D.n}</h2><div class="mu">Стиль: ${sty.n}. Предмет: ${it.n}.</div>${res}<div class="card log">${L.map(x=>`<p class="${x[1]}">${x[0]}</p>`).join('')}</div><button class="btn" onclick="${last?'fin()':'S.st++;stageUi()'}">${last?'Итоги матча':'Дальше'}</button>`)}
+function fin(){const win=S.M>0,d=Math.round(18+Math.min(12,Math.abs(S.M)*1.5))*(win?1:-1);mmr=Math.max(0,mmr+d);save();let er=[];
+if(S.ev.s<=5)er.push(`Драфт слабый (${S.ev.s}/10): ${S.ev.n.filter(x=>/Нет|Мало|одного|контрит/.test(x))[0]||'нет синергии'}`);
+S.bm.w.forEach(x=>er.push('Закуп: '+x));er.push(...[...new Set(S.lost)]);
+S.eff.forEach(e=>{if(e.sb<1)er.push(`${e.n}: стиль «${e.sty}» плохо подходит героям команды.`)});
+ui(`<h2 class="${win?'win':'lose'}" style="font-size:34px;text-align:center">${win?'ПОБЕДА':'ПОРАЖЕНИЕ'}</h2><div class="card"><div class="score ${win?'win':'lose'}">${d>0?'+':''}${d} MMR</div><div class="mu" style="text-align:center">Теперь ${mmr} MMR</div><div class="sb"><span>Убийства ${S.k}:${S.ek}</span><span>Нетворс ${S.nw}:${S.enw}</span></div></div>
+<div class="card"><b>Разбор ошибок</b><ul>${(er.length?er:['Серьёзных ошибок нет. Драфт, закуп и стили сложились.']).map(x=>`<li>${x}</li>`).join('')}</ul></div><button class="btn" onclick="menu()">Играть снова</button>`)}
+menu();
+</script></body></html>
