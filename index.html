@@ -1,146 +1,354 @@
-<!DOCTYPE html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><title>Dota Draft Sim</title>
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<title>Dota 2 Draft & Macro Simulator</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
-:root{color-scheme:dark;--bg:#0b0d12;--ln:#2a3142;--tx:#e8ecf4;--mu:#8b94a8;--rd:#e0453a;--gd:#f0b429;--gn:#3ecf8e;--bl:#4aa3ff;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
-html,body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
-body{background:radial-gradient(800px 360px at 50% -80px,#4a1219 0,transparent 70%),var(--bg);min-height:100%}
-#app{max-width:480px;margin:0 auto;padding:10px 12px 40px}
-.top{display:flex;justify-content:space-between;align-items:center;padding:6px 2px}
-.logo{font:800 18px Impact,"Arial Narrow",sans-serif;letter-spacing:1px;color:var(--rd);text-shadow:0 0 12px #e0453a99}
-.mmr{background:#1b2030;border:1px solid var(--gd);color:var(--gd);border-radius:20px;padding:3px 12px;font-weight:700}
-h2{margin:8px 0 2px;font:800 22px Impact,"Arial Narrow",sans-serif;letter-spacing:.5px}
-.mu{color:var(--mu);font-size:13px}
-.card{background:linear-gradient(180deg,#1a1f2b,#12151d);border:1px solid var(--ln);border-radius:14px;padding:12px;margin:10px 0}
-.btn{display:block;width:100%;padding:14px;border:0;border-radius:12px;font:700 16px system-ui;color:#fff;background:linear-gradient(180deg,#e8493d,#a82820);box-shadow:0 0 18px #e0453a55;margin:8px 0;cursor:pointer}
-.btn.alt{background:linear-gradient(180deg,#2c3446,#1b2030);box-shadow:none}
-.btn:disabled{opacity:.35;box-shadow:none}
-.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
-.g2{grid-template-columns:repeat(2,1fr)}
-.hero{background:#141823;border:2px solid var(--ln);border-radius:10px;padding:5px;text-align:center;color:var(--tx);font:12px system-ui;cursor:pointer}
-.hero.on{border-color:var(--gd);box-shadow:0 0 14px #f0b42988}
-.hero.dis{opacity:.4}
-.av{position:relative;aspect-ratio:16/9;border-radius:6px;overflow:hidden;display:flex;align-items:center;justify-content:center;margin:0 auto 4px;color:#fff;font:800 18px Impact,sans-serif}
-.av img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-.carry{background:linear-gradient(135deg,#c0392b,#4a0f0b)}.mid{background:linear-gradient(135deg,#2e86de,#0c2a52)}.off{background:linear-gradient(135deg,#e67e22,#55290a)}.sup{background:linear-gradient(135deg,#27ae60,#0a3a1d)}
-.rl{font-size:10px;color:var(--mu)}
-.row{display:flex;gap:8px;align-items:center}
-.lane{display:flex;gap:6px;align-items:center;padding:6px 0;border-top:1px solid var(--ln)}
-.lane:first-child{border-top:0}
-.lane .av{width:64px;margin:0}
-.lb{width:44px;font-weight:800;color:var(--gd)}
-.score{font:800 56px Impact,sans-serif;text-align:center;color:var(--gd);text-shadow:0 0 24px #f0b42988}
-.item{background:#141823;border:2px solid var(--ln);border-radius:10px;padding:5px;text-align:center;font:11px system-ui;color:var(--tx);cursor:pointer;position:relative}
-.item.on{border-color:var(--gd);box-shadow:0 0 14px #f0b42988}
-.item .ii{aspect-ratio:88/64;background:#222a3a;border-radius:6px;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px;color:#7d89a6}
-.item img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-.cost{color:var(--gd);font-weight:700}
-.inv{display:grid;grid-template-columns:repeat(6,1fr);gap:5px;margin:8px 0}
-.slot{aspect-ratio:1;background:#0f1219;border:1px dashed var(--ln);border-radius:8px;position:relative;overflow:hidden;font-size:9px;display:flex;align-items:center;justify-content:center;text-align:center;color:var(--mu)}
-.slot img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-.opt{display:block;width:100%;text-align:left;background:#141823;border:2px solid var(--ln);border-radius:10px;padding:10px;margin:6px 0;color:var(--tx);font:14px system-ui;cursor:pointer}
-.opt.on{border-color:var(--gd);box-shadow:0 0 14px #f0b42988}
-.opt b{display:block}.opt span{color:var(--mu);font-size:12px}
-.log p{margin:6px 0;padding-left:10px;border-left:3px solid var(--ln)}
-.log p.w{border-color:var(--gn)}.log p.l{border-color:var(--rd)}
-.sb{display:flex;justify-content:space-between;font-weight:700;margin:4px 0}
-.bar{height:10px;border-radius:6px;background:var(--rd);overflow:hidden;margin:4px 0}
-.bar i{display:block;height:100%;background:var(--gn)}
-.win{color:var(--gn)}.lose{color:var(--rd)}
-.tag{display:inline-block;font-size:11px;background:#222a3a;border-radius:6px;padding:1px 6px;margin:1px;color:#aab4cc}
-ul{padding-left:18px;margin:6px 0}
-</style></head><body><div id="app"></div>
-<script>
-try{var tg=window.Telegram&&Telegram.WebApp;if(tg){tg.ready();tg.expand()}}catch(e){}
-const $=s=>document.querySelector(s),R=(a,b)=>a+Math.random()*(b-a),pick=a=>a[Math.random()*a.length|0],fl=l=>[].concat(l.top,l.mid,l.bot);
-const IMG='https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/';
-const LN={top:'Топ',mid:'Мид',bot:'Бот'},RN={carry:'Керри',mid:'Мид',off:'Оффлейн',sup:'Саппорт'};
-// S=стан, B=бёрст, C=лейт-скейл, P=пуш, H=саст/хил, M=магия, F=физ
-const H=[['nevermore','Shadow Fiend','mid',['mid'],[7,7,6],'BF'],['pudge','Pudge','off',['top','mid'],[6,8,6],'SBM'],['invoker','Invoker','mid',['mid'],[5,8,8],'BMC'],['phantom_assassin','Phantom Assassin','carry',['bot'],[5,7,9],'CF'],['antimage','Anti-Mage','carry',['bot'],[4,6,10],'CF'],['juggernaut','Juggernaut','carry',['bot'],[6,8,8],'CFP'],['axe','Axe','off',['top'],[8,8,5],'SBF'],['lion','Lion','sup',['bot','top'],[8,7,4],'SBM'],['crystal_maiden','Crystal Maiden','sup',['bot'],[7,5,3],'SMH'],['huskar','Huskar','carry',['mid','bot'],[8,7,5],'BM'],['tinker','Tinker','mid',['mid'],[4,8,7],'PM'],['rubick','Rubick','sup',['top','bot'],[6,7,6],'SM'],['earthshaker','Earthshaker','sup',['top','bot'],[7,8,5],'SM'],['drow_ranger','Drow Ranger','carry',['bot'],[6,7,8],'FP'],['sniper','Sniper','carry',['mid','bot'],[7,7,6],'F'],['bristleback','Bristleback','off',['top'],[7,8,7],'HFP'],['necrolyte','Necrophos','off',['top','mid'],[8,7,6],'HM'],['queenofpain','Queen of Pain','mid',['mid'],[7,8,6],'BM'],['storm_spirit','Storm Spirit','mid',['mid'],[5,8,8],'BM'],['witch_doctor','Witch Doctor','sup',['bot','top'],[6,7,5],'SMH']].map(a=>({id:a[0],n:a[1],r:a[2],l:a[3],p:a[4],t:a[5]}));
-const M={};H.forEach(h=>M[h.id]=h);
-const CT={antimage:['invoker','storm_spirit','tinker','crystal_maiden'],pudge:['sniper','drow_ranger','tinker'],lion:['invoker','storm_spirit','antimage'],axe:['phantom_assassin','juggernaut','huskar'],earthshaker:['phantom_assassin','antimage','juggernaut'],necrolyte:['huskar','axe'],bristleback:['phantom_assassin','sniper'],queenofpain:['sniper','drow_ranger','tinker']};
-const SHOP=[['tango','Tango',90],['flask','Healing Salve',100],['magic_stick','Magic Stick',200],['quelling_blade','Quelling Blade',100],['branches','Iron Branch',50],['boots','Boots of Speed',500],['faerie_fire','Faerie Fire',70],['blight_stone','Blight Stone',300]];
-const SN={};SHOP.forEach(s=>SN[s[0]]=s);
-const ST=[{n:'Лейнинг (0–10 мин)',styles:[{n:'Агрессия на линиях',t:'SB',nv:3,d:'Станы и бёрст давят вражеских героев'},{n:'Фарм и стак',t:'C',nv:2,d:'Скейл-герои набирают золото'},{n:'Безопасный лейн',t:'H',nv:1.2,d:'Реген и стабильность, меньше разброс'}],items:[{n:'Bracer',i:'bracer',t:'H',d:'Живучесть'},{n:'Magic Wand',i:'magic_wand',t:'B',d:'Размен в драках'},{n:'Bottle',i:'bottle',t:'M',d:'Руны и мана'}]},
-{n:'Мидгейм (10–25 мин)',styles:[{n:'Драки 5х5',t:'SB',nv:3.5,d:'Контроль и бёрст решают исход'},{n:'Пуш и Рошан',t:'P',nv:2.5,d:'Давим вышки, берём Рошана'},{n:'Фарм линий',t:'C',nv:2,d:'Копим нетворс под лейт'}],items:[{n:'Blink Dagger',i:'blink',t:'S',d:'Инициация'},{n:'Black King Bar',i:'black_king_bar',t:'F',d:'Живём в драках'},{n:'Mekansm',i:'mekansm',t:'H',d:'Хил команды'}]},
-{n:'Лейтгейм (25+ мин)',styles:[{n:'Решающая драка',t:'SB',nv:4,d:'Идём ва-банк в драке'},{n:'Затяжка',t:'CH',nv:2.5,d:'Тянем на скейле и састе'},{n:'Пуш хай-граунда',t:'P',nv:3,d:'Ломаем трон'}],items:[{n:"Aghanim's Scepter",i:'ultimate_scepter',t:'M',d:'Магический урон'},{n:'Butterfly',i:'butterfly',t:'F',d:'Физический урон'},{n:'Refresher Orb',i:'refresher',t:'S',d:'Двойной контроль'}]}];
-let mmr=1000;try{mmr=+localStorage.getItem('mmr')||1000}catch(e){}
-const save=()=>{try{localStorage.setItem('mmr',mmr)}catch(e){}};
-let S={};
-const av=(h,w)=>`<div class="av ${h.r}" ${w?`style="width:${w}px"`:''}><span>${h.n.split(' ').map(x=>x[0]).join('').slice(0,2)}</span><img src="${IMG}heroes/${h.id}.png" alt="" onerror="this.remove()"></div>`;
-const iimg=(id,n)=>`<div class="ii"><span>${n[0]}</span><img src="${IMG}items/${id}.png" alt="" onerror="this.remove()"></div>`;
-const ui=(h,sc=1)=>{$('#app').innerHTML=`<div class="top"><div class="logo">DRAFT SIM</div><div class="mmr">${mmr} MMR</div></div>${h}`;if(sc)scrollTo(0,0)};
-const lanesHtml=(l,sh)=>['top','mid','bot'].map(k=>`<div class="lane"><div class="lb">${LN[k]}</div>${l[k].map(id=>`<div style="flex:1">${av(M[id])}<div class="rl" style="text-align:center">${M[id].n}</div></div>`).join('')}</div>`).join('');
+:root{--bg:#14110f;--panel:#201b17;--line:#3a3028;--gold:#d8a84e;--txt:#ece4d6;--dim:#9a8f7e;--str:#e0483e;--agi:#3fb950;--int:#3b8ee8;--uni:#f0902c}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--txt);font:14px/1.35 "Trebuchet MS",system-ui,sans-serif}
+body{padding:env(safe-area-inset-top,0) env(safe-area-inset-right,0) calc(12px + env(safe-area-inset-bottom,0)) env(safe-area-inset-left,0);max-width:520px;margin:0 auto}
+header{position:sticky;top:0;z-index:5;display:flex;gap:6px;padding:8px;background:#0e0c0a;border-bottom:2px solid var(--gold)}
+header div{flex:1;background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:4px 6px;text-align:center;font-size:12px;color:var(--dim)}
+header b{display:block;font-size:15px;color:var(--gold)}
+section{display:none;padding:10px}section.on{display:block}
+h2{margin:6px 0 8px;font:700 18px Georgia,serif;color:var(--gold)}
+.tabs{display:flex;gap:4px;margin-bottom:8px}
+.tab{flex:1;padding:8px 2px;border:1px solid var(--line);border-bottom:3px solid var(--c,var(--line));background:var(--panel);color:var(--txt);border-radius:6px 6px 0 0;font-weight:700;font-size:12px}
+.tab.on{background:var(--c);color:#fff}
+.row{display:flex;gap:6px;align-items:center;margin-bottom:8px}
+input[type=search]{flex:1;padding:9px;border-radius:6px;border:1px solid var(--line);background:#0e0c0a;color:var(--txt);font-size:14px}
+label.sw{display:flex;align-items:center;gap:5px;font-size:12px;white-space:nowrap}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.hero{position:relative;background:var(--panel);border:2px solid var(--c);border-radius:6px;padding:0;overflow:hidden;color:var(--txt);font-size:10px;text-align:center}
+.hero .p{display:block;width:100%;aspect-ratio:16/9;object-fit:cover}
+.hero span.nm{display:block;padding:3px 1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hero.sel{opacity:.35;filter:grayscale(1)}
+.hero .mk{position:absolute;top:1px;right:2px;font-size:14px}
+.badge{display:flex;align-items:center;justify-content:center;font-weight:800;color:#fff;border-radius:5px;text-shadow:0 1px 2px #000}
+.p.badge{width:100%;aspect-ratio:16/9;font-size:20px;border-radius:0}
+.i.badge{width:100%;aspect-ratio:88/64;font-size:15px}
+button{font:inherit;cursor:pointer}
+.btn{padding:10px 12px;border:1px solid var(--gold);background:linear-gradient(#3a2d17,#241a0b);color:var(--gold);border-radius:6px;font-weight:700}
+.btn:disabled{opacity:.4}
+.btn.red{border-color:var(--str);color:#ff9a92;background:#2a1311}
+.btns{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:8px 0}
+.team{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;margin:8px 0}
+.slot{background:#0e0c0a;border:1px dashed var(--line);border-radius:6px;min-height:46px;overflow:hidden;color:var(--txt);padding:0;font-size:10px;text-align:center}
+.slot img.p,.slot .p.badge{aspect-ratio:16/9}
+.inv{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:8px 0}
+.inv .slot{min-height:58px;padding:3px}
+.inv .slot.new{animation:pop .6s}
+@keyframes pop{0%{transform:scale(.6);box-shadow:0 0 0 var(--gold)}60%{transform:scale(1.15);box-shadow:0 0 18px var(--gold)}100%{transform:scale(1)}}
+.shop{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.it{background:var(--panel);border:1px solid var(--c);border-radius:6px;padding:3px;color:var(--txt);font-size:9px;text-align:center}
+.it img.i{width:100%;display:block;border-radius:4px}
+.it small{display:block;color:var(--gold)}
+.lane{display:flex;gap:8px;align-items:center;margin-bottom:6px;background:var(--panel);padding:6px;border-radius:6px}
+.lane .p{width:84px;border-radius:4px;flex:none}
+.lane select{flex:1;padding:8px;background:#0e0c0a;color:var(--txt);border:1px solid var(--line);border-radius:6px}
+#chat{height:140px;overflow:auto;background:#0b0907;border:1px solid var(--line);border-radius:6px;padding:6px;font-size:12px}
+#chat p{margin:0 0 3px}.al{color:#7fd48a}.en{color:#ff8b83}.sys{color:var(--gold)}
+#toast{position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom,0));transform:translateX(-50%);background:#000d;border:1px solid var(--gold);padding:8px 14px;border-radius:20px;opacity:0;transition:.25s;pointer-events:none;z-index:20;max-width:90%;text-align:center}
+#toast.on{opacity:1}
+#modal{position:fixed;inset:0;background:#000c;display:none;align-items:center;justify-content:center;z-index:30;padding:20px}
+#modal.on{display:flex}
+.card{background:var(--panel);border:2px solid var(--gold);border-radius:12px;padding:18px;text-align:center;width:100%;max-width:360px}
+.card .medal{font-size:64px}.card h3{margin:4px 0;font:700 22px Georgia,serif;color:var(--gold)}
+.dim{color:var(--dim);font-size:12px}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<header>
+  <div>Золото<b id="gold">0</b></div>
+  <div>Осколки<b id="shards">0</b></div>
+  <div>Порядочность<b id="dec">10 000</b></div>
+</header>
 
-function menu(){S={};ui(`<h2>Выбери режим</h2><div class="mu">Драфт, закуп и лайнинг. Победа даёт MMR.</div>
-<div class="card"><b>Один герой</b><div class="mu">Ты пикаешь героя и линию, остальных четверых подберёт ИИ.</div><button class="btn" onclick="start(1)">Один герой</button></div>
-<div class="card"><b>Весь драфт</b><div class="mu">Собери команду 5 на 5 сам.</div><button class="btn" onclick="start(5)">Весь драфт</button></div>
-<button class="btn alt" onclick="if(confirm('Сбросить MMR до 1000?')){mmr=1000;save();menu()}">Сбросить MMR</button>`)}
-function start(n){S={mode:n,sel:[]};draft()}
-function draft(sc=1){const one=S.mode==1,ok=one?S.sel.length==1:S.sel.length==5;
-ui(`<h2>Драфт</h2><div class="mu">${one?'Выбери героя':`Выбрано ${S.sel.length}/5. Нужны керри, мид, оффлейн и саппорты.`}</div>
-<div class="grid" style="margin:10px 0">${H.map(h=>`<button class="hero ${S.sel.includes(h.id)?'on':''}" onclick="tog('${h.id}')">${av(h)}<b>${h.n}</b><div class="rl">${RN[h.r]}</div></button>`).join('')}</div>
-<button class="btn" ${ok?'':'disabled'} onclick="${one?'laneSel()':'setup()'}">Подтвердить</button><button class="btn alt" onclick="menu()">В меню</button>`,sc)}
-function tog(id){if(S.mode==1)S.sel=[id];else{const i=S.sel.indexOf(id);i>=0?S.sel.splice(i,1):S.sel.length<5&&S.sel.push(id)}draft(0)}
-function laneSel(){const h=M[S.sel[0]];ui(`<h2>Линия для ${h.n}</h2><div class="card">${av(h,200)}<div class="mu" style="text-align:center">${RN[h.r]}. Подходящие линии отмечены ★</div></div>${['top','mid','bot'].map(l=>`<button class="btn ${h.l.includes(l)?'':'alt'}" onclick="S.lane='${l}';setup()">${LN[l]} ${h.l.includes(l)?'★':''}</button>`).join('')}`)}
-function assign(ids){const cap={top:2,mid:1,bot:2},res={top:[],mid:[],bot:[]},o={carry:0,mid:1,off:2,sup:3};
-[...ids].sort((a,b)=>o[M[a].r]-o[M[b].r]).forEach(id=>{const L=M[id].l.find(l=>cap[l]>0)||Object.keys(cap).find(l=>cap[l]>0);cap[L]--;res[L].push(id)});return res}
-function fill(l,used){used=[...used];const W={mid:['mid'],bot:['carry','sup'],top:['off','sup']};
-for(const L of ['mid','bot','top']){const w=[...W[L]];l[L].forEach(id=>{const i=w.indexOf(M[id].r);w.splice(i<0?0:i,1)});
-w.forEach(r=>{const a=H.filter(h=>!used.includes(h.id));let c=a.filter(h=>h.r==r&&h.l.includes(L));if(!c.length)c=a.filter(h=>h.r==r);if(!c.length)c=a;const h=pick(c);used.push(h.id);l[L].push(h.id)})}return l}
-function setup(){if(S.mode==1){const l={top:[],mid:[],bot:[]};l[S.lane].push(S.sel[0]);S.my=fill(l,[S.sel[0]])}else S.my=assign(S.sel);
-S.en=fill({top:[],mid:[],bot:[]},fl(S.my));S.ev=evalD();review()}
-function evalD(){const T=fl(S.my).map(i=>M[i]),E=fl(S.en).map(i=>M[i]),c=x=>T.filter(h=>h.t.includes(x)).length,rc=r=>T.filter(h=>h.r==r).length;let s=5,n=[];
-rc('carry')?s++:(s-=1.5,n.push('Нет керри: некому тащить лейт.'));rc('mid')?s++:(s-=1.5,n.push('Нет мидера: линия без опыта и темпа.'));
-rc('off')?s+=.5:(s-=1,n.push('Нет оффлейнера: некому начинать драки.'));
-rc('sup')?(s+=.5,rc('sup')>1&&(s+=.5)):(s-=2,n.push('Нет саппортов: герои будут голодать.'));
-c('S')>=3?(s+=1,n.push(`Контроля много (${c('S')} героев): легко ловить цели.`)):c('S')<2&&(s-=1.5,n.push('Мало стана: врага трудно удержать.'));
-c('M')&&c('F')?(s+=.5,n.push('Смешанный урон: сложно закупаться против вас.')):(s-=1,n.push('Урон одного типа: враг ответит бронёй или MKB/Pipe.'));
-c('C')>=2?(s+=.5,n.push('Два скейл-героя дают сильный лейт.')):n.push('Мало скейла: игру надо закончить до лейта.');
-c('H')&&n.push('Есть сустейн: проще пережить лейнинг.');
-T.forEach(t=>E.forEach(e=>{if((CT[t.id]||[]).includes(e.id)){s+=.4;n.push(`Контрпик: ${t.n} давит ${e.n}.`)}if((CT[e.id]||[]).includes(t.id)){s-=.4;n.push(`Враг контрит: ${e.n} против ${t.n}.`)}}));
-return{raw:s,s:Math.max(1,Math.min(10,Math.round(s))),n}}
-function review(){const e=S.ev;ui(`<h2>Оценка драфта</h2><div class="card"><div class="score">${e.s}/10</div><div class="mu" style="text-align:center">${e.s>=8?'Отличный драфт':e.s>=6?'Играбельно':'Слабая связка'}</div></div>
-<div class="card"><b>Твоя команда</b>${lanesHtml(S.my)}</div><div class="card"><b>Враги</b>${lanesHtml(S.en)}</div>
-<div class="card"><b>Синергия и контрпики</b><ul>${e.n.map(x=>`<li>${x}</li>`).join('')}</ul></div><button class="btn" onclick="buy()">К закупу</button>`)}
-function buy(){S.inv=[];buyUi()}
-const gold=()=>600-S.inv.reduce((a,i)=>a+SN[i][2],0);
-function buyUi(){ui(`<h2>Стартовый закуп</h2><div class="mu">${S.mode==1?`Герой: ${M[S.sel[0]].n} (${RN[M[S.sel[0]].r]}), ${LN[S.lane]}.`:'Закуп применяется ко всей команде.'} До 6 слотов, тапни по предмету в инвентаре, чтобы убрать.</div>
-<div class="card"><div class="sb"><span>Золото</span><span class="cost">${gold()}</span></div><div class="inv">${[0,1,2,3,4,5].map(i=>{const x=S.inv[i];return`<div class="slot" ${x?`onclick="S.inv.splice(${i},1);buyUi()"`:''}>${x?`${SN[x][1]}<img src="${IMG}items/${x}.png" alt="" onerror="this.remove()">`:''}</div>`}).join('')}</div></div>
-<div class="grid">${SHOP.map(s=>`<button class="item" onclick="if(gold()>=${s[2]}&&S.inv.length<6){S.inv.push('${s[0]}');buyUi()}">${iimg(s[0],s[1])}${s[1]}<div class="cost">${s[2]}</div></button>`).join('')}</div>
-<button class="btn" onclick="S.bm=buyMod();match()">Начать матч</button>`,0)}
-function buyMod(){const c=id=>S.inv.filter(x=>x==id).length,r=S.mode==1?M[S.sel[0]].r:null,reg=c('tango')+c('flask');let m=0,w=[];
-if(!reg){m-=2.5;w.push('Нет регена (Tango или Salve): линия будет тяжёлой.')}else m+=Math.min(2,reg)*.8;
-if(c('boots')){if(reg)m+=.8;else{m-=1.5;w.push('Голые сапоги без регена: слабый закуп.')}}
-if(c('quelling_blade')){if(r==null||r=='carry'||r=='off')m+=.6;else{m-=.3;w.push('Quelling Blade саппорту почти не нужен.')}}
-m+=c('magic_stick')*(r=='sup'?.9:.6)+Math.min(3,c('branches'))*.2+c('faerie_fire')*.3+c('blight_stone')*.3;
-const sp=600-gold();if(sp<300){m-=1;w.push('Потрачено слишком мало золота.')}
-if(!S.inv.length){m-=1;w.push('Пустой закуп.')}
-return{m:Math.max(-5,Math.min(4,m)),w}}
-function match(){S.st=0;S.k=0;S.ek=0;S.nw=0;S.enw=0;S.M=0;S.eff=[];S.lost=[];stageUi()}
-function stageUi(sc=1){const D=ST[S.st];ui(`<h2>${D.n}</h2><div class="mu">Выбери стиль и ключевой предмет.</div><b>Стиль игры</b>
-${D.styles.map((x,i)=>`<button class="opt ${S.sty===i?'on':''}" onclick="S.sty=${i};stageUi(0)"><b>${x.n}</b><span>${x.d}</span></button>`).join('')}<b>Ключевой артефакт</b>
-${D.items.map((x,i)=>`<button class="opt ${S.itm===i?'on':''}" onclick="S.itm=${i};stageUi(0)"><b>${x.n}</b><span>${x.d}</span></button>`).join('')}
-<button class="btn" ${S.sty!=null&&S.itm!=null?'':'disabled'} onclick="play()">Играть стадию</button>`,sc)}
-const tpos=['{a} зажимает {b}: убийство в начале драки','Тимфайт у Рошана: {a} и команда разбирают {b}','{a} ломает вышку, пока враги телепортируются','Рошан наш, Aegis у {a}','{a} находит {b} в лесу и берёт пик'],tneg=['{b} ловит {a} в смоке: потеря героя','Драка проиграна: {b} разносит нашу линию','{b} снимает вышку, мы не успеваем с ТП','Рошана забирают враги, Aegis у {b}','{a} ошибся с позицией и умер от {b}'];
-function play(){const s=S.st,D=ST[s],sty=D.styles[S.sty],it=D.items[S.itm],T=fl(S.my).map(i=>M[i]),E=fl(S.en).map(i=>M[i]);
-const cnt=(a,t)=>a.reduce((x,h)=>x+[...t].filter(c=>h.t.includes(c)).length,0),sb=cnt(T,sty.t)*.45,ib=cnt(T,it.t)*.35+.4,eb=R(0,3),syn=(S.ev.raw-5)*.4,nv=sty.nv,bm=S.bm.m;let m,L=[];
-if(s==0){const ds=[];['top','mid','bot'].forEach(k=>{const a=S.my[k].map(i=>M[i]),e=S.en[k].map(i=>M[i]),pa=a.reduce((x,h)=>x+h.p[0]*(h.l.includes(k)?1:.85),0)/a.length,pe=e.reduce((x,h)=>x+h.p[0]*(h.l.includes(k)?1:.85),0)/e.length;
-let b=S.mode==1?(k==S.lane?bm*1.6:.4):bm;const d=(pa-pe)*1.1+b+(sb+ib-eb-2)*.35+syn/2+R(-nv,nv);ds.push(d);
-const an=a.map(h=>h.n).join(' + '),en=e.map(h=>h.n).join(' + ');
-if(S.mode==1&&k==S.lane&&!M[S.sel[0]].l.includes(k))S.lost.push('Герой играл на нестандартной линии.');
-if(d>1.5)L.push([`${LN[k]}: ${an} дожимают ${en}. Линия выиграна, враги на 2-3 уровня позади.`,'w']);else if(d<-1.5){L.push([`${LN[k]}: ${en} выигрывают лейн у ${an}. Нам приходится отступать к вышке.`,'l']);S.lost.push(`Проиграл ${LN[k].toLowerCase()} на лейнинге.`)}else L.push([`${LN[k]}: ровный лейн, оба героя фармят под вышкой.`,'']);});
-m=ds.reduce((a,b)=>a+b)/3}
-else{const A=T.reduce((x,h)=>x+h.p[s],0),B=E.reduce((x,h)=>x+h.p[s],0);m=(A-B)*.3+(sb+ib-eb-2)*.6+syn+(s==1?bm*.3:0)+R(-nv,nv)}
-if(s>0)for(let i=0;i<4;i++){const win=Math.random()<.5+m*.07,t=pick(win?tpos:tneg);L.push([t.replace('{a}',pick(T).n).replace('{b}',pick(E).n),win?'w':'l'])}
-const K=[10,16,18][s],ak=Math.max(1,Math.round(K/2+m*1.2)),ek=Math.max(1,Math.round(K/2-m*1.2)),base=[13000,30000,40000][s],na=Math.round(base*(1+m*.03)/100)*100,ne=Math.round(base*(1-m*.03)/100)*100;
-S.k+=ak;S.ek+=ek;S.nw+=na;S.enw+=ne;S.M+=m;S.eff.push({n:D.n,sty:sty.n,sb});
-const res=`<div class="card"><div class="sb"><span class="win">Мы</span><span class="lose">Враги</span></div><div class="sb"><span>Убийства: ${S.k}</span><span>${S.ek}</span></div><div class="sb"><span>Нетворс: ${S.nw}</span><span>${S.enw}</span></div><div class="bar"><i style="width:${Math.max(5,Math.min(95,50+m*6))}%"></i></div><div class="mu">${m>1?'Стадия за нами':m<-1?'Стадия за врагами':'Равная стадия'}</div></div>`;
-S.sty=null;S.itm=null;const last=s==2;
-ui(`<h2>${D.n}</h2><div class="mu">Стиль: ${sty.n}. Предмет: ${it.n}.</div>${res}<div class="card log">${L.map(x=>`<p class="${x[1]}">${x[0]}</p>`).join('')}</div><button class="btn" onclick="${last?'fin()':'S.st++;stageUi()'}">${last?'Итоги матча':'Дальше'}</button>`)}
-function fin(){const win=S.M>0,d=Math.round(18+Math.min(12,Math.abs(S.M)*1.5))*(win?1:-1);mmr=Math.max(0,mmr+d);save();let er=[];
-if(S.ev.s<=5)er.push(`Драфт слабый (${S.ev.s}/10): ${S.ev.n.filter(x=>/Нет|Мало|одного|контрит/.test(x))[0]||'нет синергии'}`);
-S.bm.w.forEach(x=>er.push('Закуп: '+x));er.push(...[...new Set(S.lost)]);
-S.eff.forEach(e=>{if(e.sb<1)er.push(`${e.n}: стиль «${e.sty}» плохо подходит героям команды.`)});
-ui(`<h2 class="${win?'win':'lose'}" style="font-size:34px;text-align:center">${win?'ПОБЕДА':'ПОРАЖЕНИЕ'}</h2><div class="card"><div class="score ${win?'win':'lose'}">${d>0?'+':''}${d} MMR</div><div class="mu" style="text-align:center">Теперь ${mmr} MMR</div><div class="sb"><span>Убийства ${S.k}:${S.ek}</span><span>Нетворс ${S.nw}:${S.enw}</span></div></div>
-<div class="card"><b>Разбор ошибок</b><ul>${(er.length?er:['Серьёзных ошибок нет. Драфт, закуп и стили сложились.']).map(x=>`<li>${x}</li>`).join('')}</ul></div><button class="btn" onclick="menu()">Играть снова</button>`)}
-menu();
-</script></body></html>
+<section id="s-draft" class="on">
+  <h2>Драфт: выбери 5 героев</h2>
+  <div class="tabs" id="tabs"></div>
+  <div class="row">
+    <input type="search" id="q" placeholder="Поиск героя (рус / eng)">
+    <button class="btn" id="qc" aria-label="Очистить">✕</button>
+  </div>
+  <div class="row"><label class="sw"><input type="checkbox" id="metaSw"> Мета патча 🔥</label><span class="dim" id="cnt"></span></div>
+  <div class="grid" id="heroGrid"></div>
+  <div class="team" id="picked"></div>
+  <button class="btn" id="toLanes" style="width:100%" disabled>Расставить по линиям</button>
+</section>
+
+<section id="s-lanes">
+  <h2>Расстановка по линиям</h2>
+  <div id="laneList"></div>
+  <button class="btn" id="toMatch" style="width:100%">В бой</button>
+</section>
+
+<section id="s-match">
+  <h2>Матч</h2>
+  <div class="team" id="teamRow"></div>
+  <div class="tabs">
+    <button class="tab on" style="--c:#8a6d3b" data-shop="basic">Компоненты</button>
+    <button class="tab" style="--c:#7b5bd6" data-shop="final">Артефакты</button>
+  </div>
+  <div class="shop" id="shop"></div>
+  <h2>Инвентарь <span class="dim">(тап — продать за 50%)</span></h2>
+  <div class="inv" id="inv"></div>
+  <div class="btns">
+    <button class="btn" id="farm">Фармить +400</button>
+    <button class="btn" id="fight">Тимфайт</button>
+    <button class="btn" id="pause">Пауза «?»</button>
+    <button class="btn" id="tip">Типнуть в ответ (50 💎)</button>
+    <button class="btn red" id="smash" style="grid-column:1/3">Разбить шмотки и встать в Амулет</button>
+    <button class="btn" id="finish" style="grid-column:1/3">Завершить игру и получить разбор</button>
+  </div>
+  <h2>Общий чат</h2>
+  <div id="chat"></div>
+</section>
+
+<div id="modal"><div class="card">
+  <div class="medal" id="mMedal"></div><h3 id="mRank"></h3>
+  <p id="mText" class="dim"></p>
+  <div class="btns"><button class="btn" id="share">Поделиться разбором</button><button class="btn" id="again">Новая партия</button></div>
+</div></div>
+<div id="toast"></div>
+
+<script>
+"use strict";
+/* ===== Telegram ===== */
+const tg = window.Telegram && window.Telegram.WebApp;
+if (tg) { try { tg.ready(); tg.expand(); } catch (e) {} }
+
+/* ===== Данные: герои [name, ru, slug, attr, meta] ===== */
+const ATTRS = {str:{n:"Сила",c:"#e0483e"},agi:{n:"Ловкость",c:"#3fb950"},int:{n:"Интеллект",c:"#3b8ee8"},uni:{n:"Универсалы",c:"#f0902c"}};
+const HEROES = [
+ ["Axe","Топор","axe","str","A"],["Wraith King","Король-Призрак","skeleton_king","str","B"],["Pudge","Пудж","pudge","str","A"],
+ ["Earthshaker","Землетряс","earthshaker","str","B"],["Sven","Свен","sven","str","C"],["Lifestealer","Лайфстилер","life_stealer","str","S"],["Underlord","Андерлорд","abyssal_underlord","str","A"],
+ ["Anti-Mage","Анти-Маг","antimage","agi","B"],["Phantom Assassin","Фантомная убийца","phantom_assassin","agi","S"],["Drow Ranger","Дроу Рейнджер","drow_ranger","agi","B"],
+ ["Juggernaut","Джаггернаут","juggernaut","agi","A"],["Shadow Fiend","Шэдоу Финд","nevermore","agi","C"],["Faceless Void","Фейслесс Войд","faceless_void","agi","A"],["Slark","Слэрк","slark","agi","S"],
+ ["Crystal Maiden","Кристальная дева","crystal_maiden","int","B"],["Zeus","Зевс","zuus","int","A"],["Witch Doctor","Витч Доктор","witch_doctor","int","B"],
+ ["Necrophos","Некрофос","necrolyte","int","S"],["Queen of Pain","Королева Боли","queenofpain","int","A"],["Storm Spirit","Шторм Спирит","storm_spirit","int","C"],["Outworld Destroyer","Разрушитель","obsidian_destroyer","int","B"],
+ ["Meepo","Мипо","meepo","uni","C"],["Void Spirit","Войд Спирит","void_spirit","uni","A"],["Abaddon","Абаддон","abaddon","uni","B"],["Bane","Бейн","bane","uni","B"],
+ ["Clockwerk","Клокверк","rattletrap","uni","A"],["Dazzle","Даззл","dazzle","uni","C"],["Enigma","Энигма","enigma","uni","B"],["Invoker","Инвокер","invoker","uni","S"],
+ ["Magnus","Магнус","magnataur","uni","A"],["Mirana","Мирана","mirana","uni","B"],["Nyx Assassin","Никс","nyx_assassin","uni","A"],["Pangolier","Панголиер","pangolier","uni","S"],
+ ["Sand King","Сэнд Кинг","sand_king","uni","B"],["Snapfire","Снапфайр","snapfire","uni","A"],["Techies","Техис","techies","uni","C"],["Timbersaw","Тимберсо","shredder","uni","B"],
+ ["Vengeful Spirit","Венжфул Спирит","vengefulspirit","uni","A"],["Venomancer","Веномансер","venomancer","uni","S"],["Windranger","Виндранер","windrunner","uni","A"]
+].map(h => ({name:h[0], ru:h[1], slug:h[2], attr:h[3], meta:h[4]}));
+
+/* ===== Данные: предметы и рецепты (правятся тут) ===== */
+const BASE = {
+ ogre_axe:["Ogre Axe",1000], mithril_hammer:["Mithril Hammer",1600], blight_stone:["Blight Stone",300],
+ broadsword:["Broadsword",1100], blades_of_attack:["Blades of Attack",450], demon_edge:["Demon Edge",2200],
+ claymore:["Claymore",1350], cornucopia:["Cornucopia",1000], blade_of_alacrity:["Blade of Alacrity",1000],
+ band_of_elvenskin:["Band of Elvenskin",450], ultimate_orb:["Ultimate Orb",2100], point_booster:["Point Booster",1200],
+ staff_of_wizardry:["Staff of Wizardry",1000], recipe:["Recipe",1000]
+};
+const RECIPES = { // готовые сначала, промежуточные в конце
+ black_king_bar:["Black King Bar",["ogre_axe","mithril_hammer","recipe"]],
+ desolator:["Desolator",["mithril_hammer","mithril_hammer","blight_stone"]],
+ greater_crit:["Daedalus",["lesser_crit","demon_edge"]],
+ bfury:["Battle Fury",["broadsword","claymore","cornucopia"]],
+ manta:["Manta Style",["yasha","ultimate_orb"]],
+ ultimate_scepter:["Aghanim's Scepter",["point_booster","ogre_axe","blade_of_alacrity","staff_of_wizardry"]],
+ lesser_crit:["Crystalys",["broadsword","blades_of_attack"]],
+ yasha:["Yasha",["blade_of_alacrity","band_of_elvenskin"]]
+};
+const FIXED = {blink:["Blink Dagger",2250], shadow_amulet:["Shadow Amulet",1000]};
+const SHOP_FINAL = ["black_king_bar","desolator","greater_crit","bfury","manta","ultimate_scepter","blink","shadow_amulet","lesser_crit","yasha"];
+function iname(s){ return (BASE[s]||RECIPES[s]||FIXED[s])[0]; }
+function icost(s){ if (BASE[s]) return BASE[s][1]; if (FIXED[s]) return FIXED[s][1]; return RECIPES[s][1].reduce((a,p)=>a+icost(p),0); }
+function icolor(s){ return s==="recipe" ? "#777" : BASE[s] ? "#8a6d3b" : ["lesser_crit","yasha"].includes(s) ? "#3b8ee8" : "#7b5bd6"; }
+
+/* ===== Состояние ===== */
+const S = {tab:"str", q:"", meta:false, picked:[], lanes:[], gold:0, shards:0, dec:10000, inv:[], shop:"basic", bot:null, fights:0, wins:0, cringe:0};
+const $ = id => document.getElementById(id);
+const LANES = ["Лёгкая линия","Центр","Сложная линия","Роум","Лес / доп. позиция"];
+
+/* ===== Картинки с fallback ===== */
+function fb(i){ const s=document.createElement("span"); s.className=i.className+" badge"; s.style.background=i.dataset.c; s.textContent=i.dataset.n.replace(/[^A-Za-zА-Яа-я]/g,"").slice(0,2); i.onerror=null; i.replaceWith(s); }
+function img(kind,slug,name,color,cls,lazy){
+  return `<img class="${cls}" src="https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/${kind}/${slug}.png" alt="${name}" data-n="${name}" data-c="${color}" ${lazy?'loading="lazy" ':''}decoding="async" onerror="fb(this)">`;
+}
+const heroImg = (h,lazy)=>img("heroes",h.slug,h.name,ATTRS[h.attr].c,"p",lazy);
+const itemImg = s=>img("items",s,iname(s),icolor(s),"i",false);
+
+/* ===== Звук (Web Audio) ===== */
+let AC=null;
+function tone(f,t,d,type,v){ if(!AC) return; const o=AC.createOscillator(),g=AC.createGain(); o.type=type||"sine"; o.frequency.value=f; g.gain.setValueAtTime(v||.15,AC.currentTime+t); g.gain.exponentialRampToValueAtTime(.001,AC.currentTime+t+d); o.connect(g); g.connect(AC.destination); o.start(AC.currentTime+t); o.stop(AC.currentTime+t+d); }
+function sfx(k){
+  if(!AC){ try{ AC=new (window.AudioContext||window.webkitAudioContext)(); }catch(e){ return; } }
+  if(AC.state==="suspended") AC.resume();
+  if(k==="click") tone(500,0,.06,"square",.06);
+  if(k==="buy") { tone(660,0,.08); tone(880,.08,.1); }
+  if(k==="craft"){ [523,659,784,1047,1319].forEach((f,i)=>tone(f,i*.09,.25,"triangle",.2)); }
+  if(k==="shard"){ [1568,2093,2637].forEach((f,i)=>tone(f,i*.07,.5,"sine",.18)); }
+  if(k==="err") tone(140,0,.25,"sawtooth",.12);
+  if(k==="smash"){ tone(90,0,.3,"sawtooth",.2); tone(60,.1,.4,"square",.15); }
+}
+document.addEventListener("pointerdown",()=>{ if(!AC) sfx("click"); },{once:true});
+
+/* ===== Утилиты UI ===== */
+let tt;
+function toast(m){ const t=$("toast"); t.textContent=m; t.classList.add("on"); clearTimeout(tt); tt=setTimeout(()=>t.classList.remove("on"),1800); }
+function stats(){ $("gold").textContent=S.gold.toLocaleString("ru"); $("shards").textContent=S.shards; $("dec").textContent=S.dec.toLocaleString("ru"); }
+function show(id){ document.querySelectorAll("section").forEach(s=>s.classList.toggle("on",s.id===id)); window.scrollTo(0,0); }
+function say(who,text,cls){ const c=$("chat"),p=document.createElement("p"); p.className=cls; p.textContent=who+": "+text; c.appendChild(p); while(c.children.length>60) c.removeChild(c.firstChild); c.scrollTop=c.scrollHeight; }
+const rnd = a => a[Math.floor(Math.random()*a.length)];
+const ALLY=["ХП_Крип","Саппорт_5_поз","Керри_АФК"], ENEMY=["Мидер_Шторм","Рубик_Вард","Эйс_Сурен"];
+const ALLY_SAY=["Кто сказал «ГГ» на 15-й минуте?","Репорт сапорту, он не покупал вард.","Я всё пингую, а вы всё слепые.","Фармим лес, потом решим.","Дайте, пожалуйста, бкб, иначе гг."];
+const ENEMY_SAY=["Ізі катка.","Вы вообще это собирали?","Удали игру, пока не поздно.","Кто вас драфтил?","Уфф, мейн-стрим-тактика: «беги»."];
+
+/* ===== Драфт ===== */
+function renderTabs(){
+  $("tabs").innerHTML = Object.keys(ATTRS).map(k=>`<button class="tab ${S.tab===k?"on":""}" style="--c:${ATTRS[k].c}" data-t="${k}">${ATTRS[k].n}</button>`).join("");
+}
+function renderGrid(){
+  const q=S.q.trim().toLowerCase();
+  const list=HEROES.filter(h=>h.attr===S.tab && (!q || h.name.toLowerCase().includes(q) || h.ru.toLowerCase().includes(q)));
+  $("heroGrid").innerHTML = list.map(h=>{
+    const sel=S.picked.includes(h.slug);
+    const mk = S.meta ? (h.meta==="S"?"🔥":h.meta==="C"?"💀":"") : "";
+    return `<button class="hero ${sel?"sel":""}" style="--c:${ATTRS[h.attr].c}" data-h="${h.slug}" ${sel?"disabled":""}>${heroImg(h,true)}${mk?`<span class="mk">${mk}</span>`:""}<span class="nm">${h.name}</span></button>`;
+  }).join("") || `<p class="dim">Никого не найдено. Очисти поиск.</p>`;
+  $("cnt").textContent=`Выбрано: ${S.picked.length}/5`;
+}
+function renderPicked(){
+  const cells=[];
+  for(let i=0;i<5;i++){ const h=HEROES.find(x=>x.slug===S.picked[i]); cells.push(h?`<button class="slot" data-un="${h.slug}" title="Убрать">${heroImg(h,false)}</button>`:`<div class="slot"></div>`); }
+  $("picked").innerHTML=cells.join("");
+  $("toLanes").disabled = S.picked.length!==5;
+}
+function draftAll(){ renderTabs(); renderGrid(); renderPicked(); }
+
+/* ===== Крафт ===== */
+function craft(inv){
+  const made=[]; let changed=true;
+  while(changed){
+    changed=false;
+    for(const k of Object.keys(RECIPES)){
+      const copy=inv.slice(); let ok=true;
+      for(const part of RECIPES[k][1]){ const i=copy.indexOf(part); if(i<0){ ok=false; break; } copy.splice(i,1); }
+      if(ok){ inv.length=0; copy.forEach(x=>inv.push(x)); inv.push(k); made.push(k); changed=true; break; }
+    }
+  }
+  return made;
+}
+function worth(){ return S.inv.reduce((a,s)=>a+icost(s),0); }
+function metaSum(){ return S.picked.reduce((a,s)=>a+{S:3,A:2,B:1,C:0}[HEROES.find(h=>h.slug===s).meta],0); }
+
+/* ===== Магазин / инвентарь ===== */
+function renderShop(){
+  const list = S.shop==="basic" ? Object.keys(BASE) : SHOP_FINAL;
+  $("shop").innerHTML = list.map(s=>`<button class="it" style="--c:${icolor(s)}" data-b="${s}">${itemImg(s)}${iname(s)}<small>${icost(s)}g</small></button>`).join("");
+}
+function renderInv(fresh){
+  let h="";
+  for(let i=0;i<6;i++){ const s=S.inv[i]; h+= s?`<button class="slot ${fresh&&i===S.inv.length-1?"new":""}" data-s="${i}">${itemImg(s)}</button>`:`<div class="slot"></div>`; }
+  $("inv").innerHTML=h;
+}
+function penalty(n,why){
+  S.dec=Math.max(0,S.dec-n); S.shards+=50; S.cringe++; sfx("shard"); stats();
+  say("Dota Plus","+50 осколков за "+why,"sys");
+  say(rnd(ENEMY),rnd(ENEMY_SAY),"en");
+}
+function buy(s){
+  const c=icost(s);
+  if(S.gold<c){ sfx("err"); toast("Не хватает золота: нужно "+c+"g"); return; }
+  const next=S.inv.concat([s]); const made=craft(next);
+  if(next.length>6){ sfx("err"); toast("Инвентарь переполнен — продай слот"); return; }
+  const dup = S.inv.includes(s) && !BASE[s];
+  S.gold-=c; S.inv=next; stats();
+  if(made.length){ sfx("craft"); toast("Собрано: "+made.map(iname).join(", ")); say("Система","Крафт завершён: "+made.map(iname).join(", "),"sys"); } else sfx("buy");
+  renderInv(true);
+  if(s==="shadow_amulet") penalty(150,"кринжовый закуп: Shadow Amulet");
+  else if(s==="cornucopia"&&!made.length) penalty(100,"кринжовый закуп: одинокая Cornucopia");
+  else if(dup) penalty(200,"дубликат предмета: "+iname(s));
+}
+function sell(i){
+  const s=S.inv[i]; if(!s) return;
+  S.gold+=Math.floor(icost(s)/2); S.inv.splice(i,1); sfx("buy"); stats(); renderInv(false);
+  toast("Продано: "+iname(s)); say(rnd(ALLY),"Ты продал "+iname(s)+"? Серьёзно?","al");
+}
+
+/* ===== Игровые действия ===== */
+$("farm").onclick=()=>{ S.gold+=400; sfx("buy"); stats(); say(rnd(ALLY),rnd(ALLY_SAY),"al"); };
+$("fight").onclick=()=>{
+  S.fights++;
+  const p=Math.min(.85,.3+Math.min(worth()/16000,.4)+metaSum()/60);
+  if(Math.random()<p){ S.wins++; S.gold+=600; sfx("buy"); stats(); toast("Тимфайт выигран! +600g"); say(rnd(ALLY),"ГГ ВП, красиво зашли!","al"); }
+  else { penalty(200,"слитый тимфайт"); toast("Тимфайт слит. Тебя разнесли."); }
+};
+$("pause").onclick=()=>{
+  sfx("click"); S.dec=Math.max(0,S.dec-100); stats();
+  say("Вы","Игра поставлена на паузу","sys");
+  let n=0; const iv=setInterval(()=>{ say("Вы","? ".repeat(1+n),"al"); if(++n>=5){ clearInterval(iv); say(rnd(ENEMY),"Пауза из-за тебя, а не ради игры.","en"); } },280);
+};
+$("tip").onclick=()=>{
+  if(S.shards<50){ sfx("err"); toast("Нужно 50 осколков Dota Plus"); return; }
+  S.shards-=50; sfx("shard"); stats();
+  say("Вы","Типнул "+rnd(ENEMY)+": «Спасибо за нубский закуп, лови чаевые!»","al");
+  say(rnd(ENEMY),"Ты сейчас типнул, чтобы я заплакал? Работает.","en");
+};
+$("smash").onclick=()=>{
+  if(!S.inv.length){ toast("Нечего разбивать"); return; }
+  S.inv=["shadow_amulet"]; sfx("smash"); S.dec=Math.max(0,S.dec-500); S.shards+=50; S.cringe++; stats(); renderInv(true);
+  say("Вы","Разбил шмотки и встал в Амулет. Невидимый и счастливый.","al");
+  say(rnd(ENEMY),"Он забаррикадировался в амулете! Репорт.","en"); sfx("shard");
+};
+$("finish").onclick=finishGame;
+
+/* ===== Итоги и шеринг ===== */
+const RANKS=[["Рекрут","🪖"],["Страж","🛡️"],["Рыцарь","⚔️"],["Герой","🦸"],["Легенда","🏆"],["Властелин","👑"],["Божество","🌟"],["Титан","💎"]];
+function result(){
+  const score=Math.min(1,S.dec/10000)*50 + metaSum()/15*30 + Math.min(1,worth()/20000)*20;
+  return {score:Math.round(score), rank:RANKS[Math.min(7,Math.floor(score/12.5))]};
+}
+function finishGame(){
+  const r=result(); clearInterval(S.bot);
+  $("mMedal").textContent=r.rank[1]; $("mRank").textContent=r.rank[0]+" · "+r.score+" очк.";
+  $("mText").textContent=`Герои: ${S.picked.map(s=>HEROES.find(h=>h.slug===s).name).join(", ")}. Тимфайтов выиграно: ${S.wins}/${S.fights}. Кринжовых действий: ${S.cringe}. Порядочность: ${S.dec.toLocaleString("ru")}. Осколки: ${S.shards}.`;
+  $("modal").classList.add("on");
+}
+$("share").onclick=()=>{
+  const r=result();
+  const text=`${r.rank[1]} Мой разбор в Dota 2 Draft & Macro Simulator: ранг «${r.rank[0]}» (${r.score} очк.), порядочность ${S.dec}, осколков ${S.shards}. Состав: ${S.picked.map(s=>HEROES.find(h=>h.slug===s).name).join(", ")}`;
+  const url=location.href.startsWith("http")?location.href:"https://t.me";
+  if(tg && tg.openTelegramLink){ tg.openTelegramLink("https://t.me/share/url?url="+encodeURIComponent(url)+"&text="+encodeURIComponent(text)); }
+  else if(navigator.share){ navigator.share({title:"Разбор партии",text:text,url:url}).catch(()=>{}); }
+  else if(navigator.clipboard){ navigator.clipboard.writeText(text).then(()=>toast("Разбор скопирован")).catch(()=>toast("Не удалось скопировать")); }
+  else toast("Шеринг недоступен в этом браузере");
+};
+$("again").onclick=()=>{ $("modal").classList.remove("on"); S.picked=[];S.lanes=[];S.inv=[];S.fights=0;S.wins=0;S.cringe=0;S.dec=10000;S.shards=0;S.gold=0; stats(); $("chat").innerHTML=""; draftAll(); show("s-draft"); };
+
+/* ===== Навигация и события ===== */
+document.addEventListener("click",e=>{
+  const t=e.target.closest("button"); if(!t) return;
+  if(t.dataset.t){ S.tab=t.dataset.t; sfx("click"); draftAll(); }
+  else if(t.dataset.h){ if(S.picked.length<5){ S.picked.push(t.dataset.h); sfx("buy"); draftAll(); } else toast("Уже выбрано 5 героев"); }
+  else if(t.dataset.un){ S.picked=S.picked.filter(x=>x!==t.dataset.un); draftAll(); }
+  else if(t.dataset.shop){ S.shop=t.dataset.shop; document.querySelectorAll("[data-shop]").forEach(b=>b.classList.toggle("on",b===t)); renderShop(); }
+  else if(t.dataset.b) buy(t.dataset.b);
+  else if(t.dataset.s) sell(+t.dataset.s);
+});
+$("q").oninput=e=>{ S.q=e.target.value; renderGrid(); };
+$("qc").onclick=()=>{ $("q").value=""; S.q=""; renderGrid(); };
+$("metaSw").onchange=e=>{ S.meta=e.target.checked; renderGrid(); };
+$("toLanes").onclick=()=>{
+  $("laneList").innerHTML=S.picked.map((s,i)=>{ const h=HEROES.find(x=>x.slug===s);
+    return `<div class="lane">${heroImg(h,false)}<select data-l="${i}">${LANES.map((l,j)=>`<option value="${j}" ${j===i?"selected":""}>${l}</option>`).join("")}</select></div>`; }).join("");
+  show("s-lanes");
+};
+$("toMatch").onclick=()=>{
+  S.lanes=[...document.querySelectorAll("[data-l]")].map(s=>+s.value);
+  $("teamRow").innerHTML=S.picked.map((s,i)=>{ const h=HEROES.find(x=>x.slug===s); return `<div class="slot">${heroImg(h,false)}<span>${LANES[S.lanes[i]].split(" ")[0]}</span></div>`; }).join("");
+  S.gold=3000; S.inv=[]; stats(); renderShop(); renderInv(false); show("s-match");
+  say("Система","Матч начался. Заходи в лес, купи компоненты, собери артефакт.","sys");
+  clearInterval(S.bot); S.bot=setInterval(()=>{ Math.random()<.5?say(rnd(ALLY),rnd(ALLY_SAY),"al"):say(rnd(ENEMY),rnd(ENEMY_SAY),"en"); },7000);
+};
+draftAll(); stats();
+</script>
+</body>
+</html>
