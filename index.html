@@ -163,35 +163,39 @@ const hero = s => HEROES.find(h => h.slug === s);
 /* ===== Предметы и рецепты ===== */
 const BASE = {
  ogre_axe:["Ogre Axe",1000], mithril_hammer:["Mithril Hammer",1600], blight_stone:["Blight Stone",300],
- broadsword:["Broadsword",1100], blades_of_attack:["Blades of Attack",450], demon_edge:["Demon Edge",2200],
- claymore:["Claymore",1350], cornucopia:["Cornucopia",1000], blade_of_alacrity:["Blade of Alacrity",1000],
- band_of_elvenskin:["Band of Elvenskin",450], ultimate_orb:["Ultimate Orb",2100], point_booster:["Point Booster",1200],
- staff_of_wizardry:["Staff of Wizardry",1000], recipe:["Recipe",1000]
+ broadsword:["Broadsword",1000], blades_of_attack:["Blades of Attack",450], demon_edge:["Demon Edge",2200],
+ claymore:["Claymore",1350], ring_of_health:["Ring of Health",700], void_stone:["Void Stone",700],
+ blade_of_alacrity:["Blade of Alacrity",1000], band_of_elvenskin:["Band of Elvenskin",450], ultimate_orb:["Ultimate Orb",2800],
+ point_booster:["Point Booster",1200], staff_of_wizardry:["Staff of Wizardry",1000],
+ recipe_bkb:["Recipe (BKB)",1450], recipe_crystalys:["Recipe (Crystalys)",550], recipe_daedalus:["Recipe (Daedalus)",950],
+ recipe_yasha:["Recipe (Yasha)",650], recipe_bfury:["Recipe (Battle Fury)",450]
 };
-const RECIPES = {
- black_king_bar:["Black King Bar",["ogre_axe","mithril_hammer","recipe"]],
+const RECIPES = { // готовые предметы сначала, промежуточные в конце; цена = сумма частей
+ black_king_bar:["Black King Bar",["ogre_axe","mithril_hammer","recipe_bkb"]],
  desolator:["Desolator",["mithril_hammer","mithril_hammer","blight_stone"]],
- greater_crit:["Daedalus",["lesser_crit","demon_edge"]],
- bfury:["Battle Fury",["broadsword","claymore","cornucopia"]],
+ greater_crit:["Daedalus",["lesser_crit","demon_edge","recipe_daedalus"]],
+ bfury:["Battle Fury",["broadsword","claymore","perseverance","recipe_bfury"]],
  manta:["Manta Style",["yasha","ultimate_orb"]],
  ultimate_scepter:["Aghanim's Scepter",["point_booster","ogre_axe","blade_of_alacrity","staff_of_wizardry"]],
- lesser_crit:["Crystalys",["broadsword","blades_of_attack"]],
- yasha:["Yasha",["blade_of_alacrity","band_of_elvenskin"]]
+ lesser_crit:["Crystalys",["broadsword","blades_of_attack","recipe_crystalys"]],
+ yasha:["Yasha",["blade_of_alacrity","band_of_elvenskin","recipe_yasha"]],
+ perseverance:["Perseverance",["ring_of_health","void_stone"]]
 };
-const FIXED = {blink:["Blink Dagger",2250], shadow_amulet:["Shadow Amulet",1000]};
-const SHOP_FINAL = ["black_king_bar","desolator","greater_crit","bfury","manta","ultimate_scepter","blink","shadow_amulet","lesser_crit","yasha"];
+const FIXED = {blink:["Blink Dagger",2250], shadow_amulet:["Shadow Amulet",900]};
+const ICON = {band_of_elvenskin:"boots_of_elves", recipe_bkb:"recipe", recipe_crystalys:"recipe", recipe_daedalus:"recipe", recipe_yasha:"recipe", recipe_bfury:"recipe"};
+const SHOP_FINAL = ["black_king_bar","desolator","greater_crit","bfury","manta","ultimate_scepter","blink","shadow_amulet","lesser_crit","yasha","perseverance"];
 const iname = s => (BASE[s]||RECIPES[s]||FIXED[s])[0];
 function icost(s){ if (BASE[s]) return BASE[s][1]; if (FIXED[s]) return FIXED[s][1]; return RECIPES[s][1].reduce((a,p)=>a+icost(p),0); }
-const icolor = s => s==="recipe" ? "#777" : BASE[s] ? "#8a6d3b" : ["lesser_crit","yasha"].includes(s) ? "#3b8ee8" : "#7b5bd6";
+const icolor = s => s.startsWith("recipe") ? "#777" : BASE[s] ? "#8a6d3b" : ["lesser_crit","yasha","perseverance"].includes(s) ? "#3b8ee8" : "#7b5bd6";
 
 /* ===== Роли, предпочтения ботов, билды по таймингам ===== */
 const ROLES = ["Керри","Мид","Оффлейн","Саппорт 4","Саппорт 5"];
 const RS = ["К","М","О","П4","П5"];
 const PREF = [["agi","str"],["int","uni","agi"],["str","uni"],["uni","int"],["int","uni"]];
 const BUILDS = [
- ["broadsword","blades_of_attack","demon_edge","ogre_axe","mithril_hammer","recipe","blink"],
- ["blade_of_alacrity","band_of_elvenskin","ultimate_orb","blink","point_booster"],
- ["ogre_axe","mithril_hammer","recipe","blink","mithril_hammer","blight_stone"],
+ ["broadsword","blades_of_attack","recipe_crystalys","demon_edge","recipe_daedalus","ogre_axe","mithril_hammer","recipe_bkb","blink"],
+ ["blade_of_alacrity","band_of_elvenskin","recipe_yasha","ultimate_orb","blink","point_booster"],
+ ["ogre_axe","mithril_hammer","recipe_bkb","blink","mithril_hammer","blight_stone"],
  ["blink","point_booster","ogre_axe","blade_of_alacrity","staff_of_wizardry"],
  ["point_booster","staff_of_wizardry","blade_of_alacrity","ogre_axe","blink"]
 ];
@@ -210,7 +214,7 @@ function img(kind,slug,name,color,cls,lazy){
   return `<img class="${cls}" src="https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/${kind}/${slug}.png" alt="${name}" data-n="${name}" data-c="${color}" ${lazy?'loading="lazy" ':''}decoding="async" onerror="fb(this)">`;
 }
 const heroImg = (h,lazy)=>img("heroes",h.slug,h.name,ATTRS[h.attr].c,"p",lazy);
-const itemImg = s=>img("items",s,iname(s),icolor(s),"i",false);
+const itemImg = s=>img("items",ICON[s]||s,iname(s),icolor(s),"i",false);
 
 /* ===== Звук ===== */
 let AC=null;
@@ -326,7 +330,6 @@ function buy(s){
   if(made.length){ sfx("craft"); toast("Собрано: "+made.map(iname).join(", ")); say("команда","Система",`${p.name} собрал ${made.map(iname).join(", ")}`,"sys"); } else sfx("buy");
   renderInv(true); stats();
   if(s==="shadow_amulet") penalty(p,150,"кринжовый закуп: Shadow Amulet");
-  else if(s==="cornucopia"&&!made.length) penalty(p,100,"кринжовый закуп: одинокая Cornucopia");
   else if(dup) penalty(p,200,"дубликат: "+iname(s));
 }
 function sell(i){
